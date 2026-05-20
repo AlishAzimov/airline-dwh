@@ -142,12 +142,52 @@ CREATE table if not exists raw.tickets (
 	
 	
 	
+CREATE table if not exists raw.tickets (
+	ticket_no text,
+	book_ref text,
+	passenger_id text,
+	passenger_name text,
+	outbound bool,	
+	-- технические поля для аудита, lineage и имитации CDC
+	load_date timestamptz not null default now(), -- дата и время загрузки записи в DWH
+	record_source text not null, -- источник записи: таблица, файл, API и т.д.
+	source_system text not null, -- исходная система, откуда пришли данные
+	batch_id bigint, -- идентификатор пакета загрузки
+	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
+	raw_row_hash text -- хеш строки для проверки изменений
+);
+	
+	
+
+-- RAW CDC snapshot: хранит последнее состояние таблиц в source для определения I/U/D
+CREATE table if not exists raw.bookings_snapshot (
+	book_ref text primary key,
+	book_date timestamptz ,
+	total_amount numeric(10, 2),
+	-- технические поля
+	raw_row_hash text not null, -- хеш строки для проверки изменений
+	last_seen_at timestamptz not null default now() -- дата последнего фисирование строки в source
+);
 	
 	
 	
-	
-	
-	
-	
-	
-	
+--select count(*) from raw.bookings_snapshot 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
