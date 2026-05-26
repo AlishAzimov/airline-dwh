@@ -59,3 +59,19 @@ CREATE table if not exists raw.boarding_passes_snapshot (
 	-- Создание парных превичных ключей
 	constraint pk_raw_boarding_passes_snapshot primary key (ticket_no, flight_id)
 );
+
+
+--flights
+
+CREATE table if not exists raw.flights_snapshot (
+	flight_id int4 primary key,
+	route_no text,
+	status text,
+	scheduled_departure timestamptz,
+	scheduled_arrival timestamptz,
+	actual_departure timestamptz,
+	actual_arrival timestamptz,
+	-- технические поля
+	raw_row_hash text not null, -- хеш строки для проверки изменений
+	last_seen_at timestamptz not null default now() -- дата последнего фиксирование строки в source
+);
