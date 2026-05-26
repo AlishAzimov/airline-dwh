@@ -29,20 +29,19 @@ CREATE table if not exists raw.tickets_snapshot (
 	last_seen_at timestamptz not null default now() -- дата последнего фиксирование строки в source
 );
 	
-	
---select count(*) from raw.bookings_snapshot 
+--segments	
 
-
-
-
-
-
-select * from raw.tickets_snapshot
-
-
-
-
-
+CREATE table if not exists raw.segments_snapshot (
+	ticket_no text not null,
+	flight_id int4 not null,
+	fare_conditions text,
+	price numeric(10, 2),
+	-- технические поля
+	raw_row_hash text not null, -- хеш строки для проверки изменений
+	last_seen_at timestamptz not null default now(), -- дата последнего фиксирование строки в source
+	-- Создание парных превичных ключей
+	constraint pk_raw_segments_snapshot primary key (ticket_no, flight_id)
+);
 
 
 
