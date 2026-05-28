@@ -388,41 +388,41 @@ $$;
 ----------------------
 -- test
 
-call raw.load_boarding_passes_initial();
-
-select * from raw.boarding_passes order by ticket_no desc limit 15
-
-call raw.init_boarding_passes_snapshot()
-
-select * from raw.boarding_passes_snapshot order by ticket_no desc limit 10
-
-insert into 
-	source_fdw.boarding_passes(
-		ticket_no,
-		flight_id,
-		seat_no,
-		boarding_no,
-		boarding_time)
-values ('0005453207700', 135473, '9A', 9, now());
-
-
-update source_fdw.boarding_passes
-set 
-	seat_no='9A',
-	boarding_no=777,
-	boarding_time=now()
-where ticket_no='0005453201244' 
-and flight_id=124941
-
-delete from source_fdw.boarding_passes
-where ticket_no='0005453201083'
-and flight_id=124923
-
-select * from source_fdw.boarding_passes order by ticket_no desc limit 15
-
-
-delete from source_fdw.boarding_passes
-where ticket_no = '0005453207640'
-
-
-call raw.load_boarding_passes_delta()
+--call raw.load_boarding_passes_initial();
+--
+--select * from raw.boarding_passes order by ticket_no desc limit 15
+--
+--call raw.init_boarding_passes_snapshot()
+--
+--select * from raw.boarding_passes_snapshot order by ticket_no desc limit 10
+--
+--insert into 
+--	source_fdw.boarding_passes(
+--		ticket_no,
+--		flight_id,
+--		seat_no,
+--		boarding_no,
+--		boarding_time)
+--values ('0005453207700', 135473, '9A', 9, now());
+--
+--
+--update source_fdw.boarding_passes
+--set 
+--	seat_no='9A',
+--	boarding_no=777,
+--	boarding_time=now()
+--where ticket_no='0005453201244' 
+--and flight_id=124941
+--
+--delete from source_fdw.boarding_passes
+--where ticket_no='0005453201083'
+--and flight_id=124923
+--
+--select * from source_fdw.boarding_passes order by ticket_no desc limit 15
+--
+--
+--delete from source_fdw.boarding_passes
+--where ticket_no = '0005453207640'
+--
+--
+--call raw.load_boarding_passes_delta()

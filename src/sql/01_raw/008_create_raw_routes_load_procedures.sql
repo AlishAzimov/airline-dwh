@@ -434,43 +434,43 @@ $$;
 
 ----------------------
 -- test
-
-call raw.load_routes_initial();
-
-select * from raw.routes order by route_no desc limit 15
-
-call raw.init_routes_snapshot()
-
-select * from raw.routes_snapshot order by route_no desc limit 10
-
-insert into 
-	source_fdw.routes(
-	 	route_no,
-		validity,
-		departure_airport,
-		arrival_airport,
-		airplane_code,
-		days_of_week,
-		scheduled_time,
-		duration)
-values ('PG1800',
-		'["2027-10-01 05:00:00+05","2027-11-01 05:00:00+05")'::tstzrange, 
-		'DEN', 
-		'ARN', 
-		'789',
-		array[1, 3, 5],
-		'00:07:00',
-		 interval '7 hours'
-		);
-
-
-update source_fdw.routes
-set 
-	days_of_week=array[1, 3, 5]
-where route_no='PG1792' and validity = '["2027-10-01 05:00:00+05","2027-11-01 05:00:00+05")'::tstzrange;
-
-delete from source_fdw.routes
-where route_no='PG1797' and validity = '["2027-10-01 05:00:00+05","2027-11-01 05:00:00+05")'::tstzrange;
-
-
-call raw.load_routes_delta()
+--
+--call raw.load_routes_initial();
+--
+--select * from raw.routes order by route_no desc limit 15
+--
+--call raw.init_routes_snapshot()
+--
+--select * from raw.routes_snapshot order by route_no desc limit 10
+--
+--insert into 
+--	source_fdw.routes(
+--	 	route_no,
+--		validity,
+--		departure_airport,
+--		arrival_airport,
+--		airplane_code,
+--		days_of_week,
+--		scheduled_time,
+--		duration)
+--values ('PG1800',
+--		'["2027-10-01 05:00:00+05","2027-11-01 05:00:00+05")'::tstzrange, 
+--		'DEN', 
+--		'ARN', 
+--		'789',
+--		array[1, 3, 5],
+--		'00:07:00',
+--		 interval '7 hours'
+--		);
+--
+--
+--update source_fdw.routes
+--set 
+--	days_of_week=array[1, 3, 5]
+--where route_no='PG1792' and validity = '["2027-10-01 05:00:00+05","2027-11-01 05:00:00+05")'::tstzrange;
+--
+--delete from source_fdw.routes
+--where route_no='PG1797' and validity = '["2027-10-01 05:00:00+05","2027-11-01 05:00:00+05")'::tstzrange;
+--
+--
+--call raw.load_routes_delta()

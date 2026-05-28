@@ -383,36 +383,36 @@ $$;
 ----------------------
 -- test
 
-call raw.load_tickets_initial()
-
-select * from raw.tickets order by ticket_no desc limit 10
-
-call raw.init_tickets_snapshot()
-
-select * from raw.tickets_snapshot limit 10
-
-insert into 
-	source_fdw.tickets(
-			ticket_no,
-			book_ref,
-			passenger_id,
-			passenger_name,
-			outbound)
-values ('0005453207700', 'OJ1F1D', 'UZ 9000000000000', 'Alisher Azimov', false);
-
-
-update source_fdw.tickets
-set 
-	passenger_id='UZ 9000000000000',
-	passenger_name = 'Alisher Azimov',
-	outbound = false
-where ticket_no='0005453207642'
-
-delete from source_fdw.tickets
-where ticket_no='0005453207640'
-
-delete from source_fdw.segments
-where ticket_no = '0005453207640'
-
-
-call raw.load_tickets_delta()
+--call raw.load_tickets_initial()
+--
+--select * from raw.tickets order by ticket_no desc limit 10
+--
+--call raw.init_tickets_snapshot()
+--
+--select * from raw.tickets_snapshot limit 10
+--
+--insert into 
+--	source_fdw.tickets(
+--			ticket_no,
+--			book_ref,
+--			passenger_id,
+--			passenger_name,
+--			outbound)
+--values ('0005453207700', 'OJ1F1D', 'UZ 9000000000000', 'Alisher Azimov', false);
+--
+--
+--update source_fdw.tickets
+--set 
+--	passenger_id='UZ 9000000000000',
+--	passenger_name = 'Alisher Azimov',
+--	outbound = false
+--where ticket_no='0005453207642'
+--
+--delete from source_fdw.tickets
+--where ticket_no='0005453207640'
+--
+--delete from source_fdw.segments
+--where ticket_no = '0005453207640'
+--
+--
+--call raw.load_tickets_delta()

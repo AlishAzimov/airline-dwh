@@ -370,40 +370,40 @@ $$;
 
 ----------------------
 -- test
-
-call raw.load_segments_initial();
-
-select * from raw.segments order by ticket_no desc limit 15
-
-call raw.init_segments_snapshot()
-
-select * from raw.segments_snapshot order by ticket_no desc limit 10
-
-insert into 
-	source_fdw.segments(
-			ticket_no,
-			flight_id,
-			fare_conditions,
-			price)
-values ('0005453207700', 135473, 'Business', 10000.15);
-
-
-update source_fdw.segments
-set 
-	fare_conditions='Comfort',
-	price=10000.25
-where ticket_no='0005453207644' 
-and flight_id=135087
-
-delete from source_fdw.segments
-where ticket_no='0005453207641'
-and flight_id=135473
-
-select * from source_fdw.segments order by ticket_no desc limit 15
-
-
-delete from source_fdw.segments
-where ticket_no = '0005453207640'
-
-
-call raw.load_segments_delta()
+--
+--call raw.load_segments_initial();
+--
+--select * from raw.segments order by ticket_no desc limit 15
+--
+--call raw.init_segments_snapshot()
+--
+--select * from raw.segments_snapshot order by ticket_no desc limit 10
+--
+--insert into 
+--	source_fdw.segments(
+--			ticket_no,
+--			flight_id,
+--			fare_conditions,
+--			price)
+--values ('0005453207700', 135473, 'Business', 10000.15);
+--
+--
+--update source_fdw.segments
+--set 
+--	fare_conditions='Comfort',
+--	price=10000.25
+--where ticket_no='0005453207644' 
+--and flight_id=135087
+--
+--delete from source_fdw.segments
+--where ticket_no='0005453207641'
+--and flight_id=135473
+--
+--select * from source_fdw.segments order by ticket_no desc limit 15
+--
+--
+--delete from source_fdw.segments
+--where ticket_no = '0005453207640'
+--
+--
+--call raw.load_segments_delta()

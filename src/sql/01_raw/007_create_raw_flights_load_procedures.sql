@@ -415,37 +415,37 @@ $$;
 
 ----------------------
 -- test
-
-call raw.load_flights_initial();
-
-select * from raw.flights order by flight_id desc limit 15
-
-call raw.init_flights_snapshot()
-
-select * from raw.flights_snapshot order by flight_id desc limit 10
-
-insert into 
-	source_fdw.flights(
-	 	flight_id,
-		route_no,
-		status,
-		scheduled_departure,
-		scheduled_arrival,
-		actual_departure,
-		actual_arrival)
-overriding system value
-values (135580,'PG0011', 'Departed', now() - interval '10 hours', now(),now() - interval '10 hours', now());
-
-
-update source_fdw.flights
-set 
-	status='Boarding'
-where flight_id=135563
-
-delete from source_fdw.flights
-where flight_id=135567
-
-select * from source_fdw.flights order by ticket_no desc limit 15
-
-
-call raw.load_flights_delta()
+--
+--call raw.load_flights_initial();
+--
+--select * from raw.flights order by flight_id desc limit 15
+--
+--call raw.init_flights_snapshot()
+--
+--select * from raw.flights_snapshot order by flight_id desc limit 10
+--
+--insert into 
+--	source_fdw.flights(
+--	 	flight_id,
+--		route_no,
+--		status,
+--		scheduled_departure,
+--		scheduled_arrival,
+--		actual_departure,
+--		actual_arrival)
+--overriding system value
+--values (135580,'PG0011', 'Departed', now() - interval '10 hours', now(),now() - interval '10 hours', now());
+--
+--
+--update source_fdw.flights
+--set 
+--	status='Boarding'
+--where flight_id=135563
+--
+--delete from source_fdw.flights
+--where flight_id=135567
+--
+--select * from source_fdw.flights order by ticket_no desc limit 15
+--
+--
+--call raw.load_flights_delta()

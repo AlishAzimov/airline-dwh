@@ -371,35 +371,35 @@ $$;
 
 ----------------------
 -- test
-
-call raw.load_airplanes_data_initial();
-
-select * from raw.airplanes_data 
-
-call raw.init_airplanes_data_snapshot()
-
-select * from raw.airplanes_data_snapshot 
-
-insert into source_fdw.airplanes_data (
-    airplane_code,
-    model,
-    "range",
-    speed
-)
-values (
-    '738',
-    '{"en": "Boeing 737-800", "ru": "Боинг 737-800"}'::jsonb,
-    5765,
-    850
-);
-
-
-update source_fdw.airplanes_data
-set speed = 855
-where airplane_code = '76F';
-
-delete from source_fdw.airplanes_data
-where airplane_code='738';
-
-
-call raw.load_airplanes_data_delta()
+--
+--call raw.load_airplanes_data_initial();
+--
+--select * from raw.airplanes_data 
+--
+--call raw.init_airplanes_data_snapshot()
+--
+--select * from raw.airplanes_data_snapshot 
+--
+--insert into source_fdw.airplanes_data (
+--    airplane_code,
+--    model,
+--    "range",
+--    speed
+--)
+--values (
+--    '738',
+--    '{"en": "Boeing 737-800", "ru": "Боинг 737-800"}'::jsonb,
+--    5765,
+--    850
+--);
+--
+--
+--update source_fdw.airplanes_data
+--set speed = 855
+--where airplane_code = '76F';
+--
+--delete from source_fdw.airplanes_data
+--where airplane_code='738';
+--
+--
+--call raw.load_airplanes_data_delta()

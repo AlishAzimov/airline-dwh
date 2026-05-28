@@ -358,32 +358,32 @@ $$;
 ----------------------
 -- test
 
-call raw.load_seats_initial();
-
-select * from raw.seats order by seat_no limit 20
-
-call raw.init_seats_snapshot()
-
-select * from raw.seats_snapshot limit 20
-
-insert into source_fdw.seats (
-    airplane_code,
-	seat_no,
-	fare_conditions
-)
-values (
-    '32N',
-    '0A',
-    'Business'
-);
-
-
-update source_fdw.seats
-set fare_conditions = 'Economy'
-where airplane_code = '32N' and seat_no = '0A';
-
-delete from source_fdw.seats
-where airplane_code = '32N' and seat_no = '0A';
-
-
-call raw.load_seats_delta()
+--call raw.load_seats_initial();
+--
+--select * from raw.seats order by seat_no limit 20
+--
+--call raw.init_seats_snapshot()
+--
+--select * from raw.seats_snapshot limit 20
+--
+--insert into source_fdw.seats (
+--    airplane_code,
+--	seat_no,
+--	fare_conditions
+--)
+--values (
+--    '32N',
+--    '0A',
+--    'Business'
+--);
+--
+--
+--update source_fdw.seats
+--set fare_conditions = 'Economy'
+--where airplane_code = '32N' and seat_no = '0A';
+--
+--delete from source_fdw.seats
+--where airplane_code = '32N' and seat_no = '0A';
+--
+--
+--call raw.load_seats_delta()

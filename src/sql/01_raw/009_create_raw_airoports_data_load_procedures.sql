@@ -400,59 +400,59 @@ $$;
 ----------------------
 -- test
 
-call raw.load_airports_data_initial();
-
-select * from raw.airports_data 
-where country ->> 'en' ilike 'Uzbe%'
-
- 
-
-call raw.init_airports_data_snapshot()
-
-select * from raw.airports_data_snapshot order by airport_code desc limit 10
-
-insert into source_fdw.airports_data (
-    airport_code,
-    airport_name,
-    city,
-    country,
-    coordinates,
-    timezone
-)
-values (
-    'XVA',
-    '{"en": "Khiva", "ru": "Хива"}'::jsonb,
-    '{"en": "Khiva", "ru": "Хива"}'::jsonb,
-    '{"en": "Uzbekistan", "ru": "Узбекистан"}'::jsonb,
-    '(60.3639,41.3783)'::point,
-    'Asia/Tashkent'
-);
-
-insert into source_fdw.airports_data (
-    airport_code,
-    airport_name,
-    city,
-    country,
-    coordinates,
-    timezone
-)
-values (
-    'UGC',
-    '{"en": "Urgench", "ru": "Ургенч"}'::jsonb,
-    '{"en": "Urgench", "ru": "Ургенч"}'::jsonb,
-    '{"en": "Uzbekistan", "ru": "Узбекистан"}'::jsonb,
-    point(60.6417, 41.5843),
-    'Asia/Samarkand'
-);
-
-
-update source_fdw.airports_data
-set 
-	timezone='Asia/Tashkent'
-where  airport_code='TAS'
-
-delete from source_fdw.airports_data
-where airport_code='UGC';
-
-
-call raw.load_airports_data_delta()
+--call raw.load_airports_data_initial();
+--
+--select * from raw.airports_data 
+--where country ->> 'en' ilike 'Uzbe%'
+--
+-- 
+--
+--call raw.init_airports_data_snapshot()
+--
+--select * from raw.airports_data_snapshot order by airport_code desc limit 10
+--
+--insert into source_fdw.airports_data (
+--    airport_code,
+--    airport_name,
+--    city,
+--    country,
+--    coordinates,
+--    timezone
+--)
+--values (
+--    'XVA',
+--    '{"en": "Khiva", "ru": "Хива"}'::jsonb,
+--    '{"en": "Khiva", "ru": "Хива"}'::jsonb,
+--    '{"en": "Uzbekistan", "ru": "Узбекистан"}'::jsonb,
+--    '(60.3639,41.3783)'::point,
+--    'Asia/Tashkent'
+--);
+--
+--insert into source_fdw.airports_data (
+--    airport_code,
+--    airport_name,
+--    city,
+--    country,
+--    coordinates,
+--    timezone
+--)
+--values (
+--    'UGC',
+--    '{"en": "Urgench", "ru": "Ургенч"}'::jsonb,
+--    '{"en": "Urgench", "ru": "Ургенч"}'::jsonb,
+--    '{"en": "Uzbekistan", "ru": "Узбекистан"}'::jsonb,
+--    point(60.6417, 41.5843),
+--    'Asia/Samarkand'
+--);
+--
+--
+--update source_fdw.airports_data
+--set 
+--	timezone='Asia/Tashkent'
+--where  airport_code='TAS'
+--
+--delete from source_fdw.airports_data
+--where airport_code='UGC';
+--
+--
+--call raw.load_airports_data_delta()
