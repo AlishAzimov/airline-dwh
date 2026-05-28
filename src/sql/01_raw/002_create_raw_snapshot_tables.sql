@@ -113,14 +113,27 @@ CREATE table if not exists raw.airports_data_snapshot (
 
 --airplanes_data
 
-CREATE table if not exists raw.airplanes_data (
+CREATE table if not exists raw.airplanes_data_snapshot (
 	airplane_code text primary key,
 	model jsonb,
 	"range" int4,
-	speed int4,,
+	speed int4,
 	-- технические поля
 	raw_row_hash text not null, -- хеш строки для проверки изменений
 	last_seen_at timestamptz not null default now() -- дата последнего фиксирование строки в source
+);
+	
+
+--seats
+
+CREATE table if not exists raw.seats_snapshot (
+	airplane_code text,
+	seat_no text,
+	fare_conditions text,
+	-- технические поля
+	raw_row_hash text not null, -- хеш строки для проверки изменений
+	last_seen_at timestamptz not null default now(), -- дата последнего фиксирование строки в source
+	constraint pk_raw_seats_snapshot primary key (airplane_code, seat_no)
 );
 	
 	
