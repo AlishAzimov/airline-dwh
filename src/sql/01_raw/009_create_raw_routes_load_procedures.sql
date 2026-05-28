@@ -375,7 +375,8 @@ create table raw.routes_snapshot as
 		src.days_of_week,
 		src.scheduled_time,
 		src.duration,
-		src.raw_row_hash
+		src.raw_row_hash,
+		now() as last_seen_at
 	from tmp_source_routes src;
 	
 end;

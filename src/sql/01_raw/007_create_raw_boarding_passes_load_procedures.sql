@@ -328,7 +328,8 @@ create table raw.boarding_passes_snapshot as
 		src.seat_no,
 		src.boarding_no,
 		src.boarding_time,	
-		src.raw_row_hash
+		src.raw_row_hash,
+		now() as last_seen_at
 	from tmp_source_boarding_passes src;
 	
 end;

@@ -323,7 +323,8 @@ create table raw.tickets_snapshot as
 		src.passenger_id,
 		src.passenger_name,
 		src.outbound,
-		src.raw_row_hash
+		src.raw_row_hash,
+		now() as last_seen_at
 	from tmp_source_tickets src;
 	
 end;

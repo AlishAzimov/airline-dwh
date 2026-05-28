@@ -311,7 +311,8 @@ create table raw.segments_snapshot as
 		src.flight_id,
 		src.fare_conditions,
 		src.price,	
-		src.raw_row_hash
+		src.raw_row_hash,
+		now() as last_seen_at
 	from tmp_source_segments src;
 	
 end;

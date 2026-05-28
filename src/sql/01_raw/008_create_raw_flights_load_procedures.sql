@@ -356,7 +356,8 @@ create table raw.flights_snapshot as
 		src.scheduled_arrival,
 		src.actual_departure,
 		src.actual_arrival,
-		src.raw_row_hash
+		src.raw_row_hash,
+		now() as last_seen_at
 	from tmp_source_flights src;
 	
 end;
