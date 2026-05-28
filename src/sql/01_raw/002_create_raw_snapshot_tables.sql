@@ -98,12 +98,26 @@ CREATE table if not exists raw.routes_snapshot (
 --airports_data
 
 CREATE table if not exists raw.airports_data_snapshot (
-	airport_code text ,
+	airport_code text primary key,
 	airport_name jsonb ,
 	city jsonb ,
 	country jsonb ,
 	coordinates point ,
 	timezone text ,
+	-- технические поля
+	raw_row_hash text not null, -- хеш строки для проверки изменений
+	last_seen_at timestamptz not null default now() -- дата последнего фиксирование строки в source
+);
+
+
+
+--airplanes_data
+
+CREATE table if not exists raw.airplanes_data (
+	airplane_code text primary key,
+	model jsonb,
+	"range" int4,
+	speed int4,,
 	-- технические поля
 	raw_row_hash text not null, -- хеш строки для проверки изменений
 	last_seen_at timestamptz not null default now() -- дата последнего фиксирование строки в source

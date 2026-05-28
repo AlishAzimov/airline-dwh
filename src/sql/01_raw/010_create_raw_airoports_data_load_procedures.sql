@@ -428,6 +428,23 @@ values (
     'Asia/Tashkent'
 );
 
+insert into source_fdw.airports_data (
+    airport_code,
+    airport_name,
+    city,
+    country,
+    coordinates,
+    timezone
+)
+values (
+    'UGC',
+    '{"en": "Urgench", "ru": "Ургенч"}'::jsonb,
+    '{"en": "Urgench", "ru": "Ургенч"}'::jsonb,
+    '{"en": "Uzbekistan", "ru": "Узбекистан"}'::jsonb,
+    point(60.6417, 41.5843),
+    'Asia/Samarkand'
+);
+
 
 update source_fdw.airports_data
 set 
