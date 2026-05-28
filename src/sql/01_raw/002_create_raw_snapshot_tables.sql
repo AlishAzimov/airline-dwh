@@ -75,3 +75,24 @@ CREATE table if not exists raw.flights_snapshot (
 	raw_row_hash text not null, -- хеш строки для проверки изменений
 	last_seen_at timestamptz not null default now() -- дата последнего фиксирование строки в source
 );
+
+--routes
+
+CREATE table if not exists raw.routes_snapshot (
+	route_no text,
+	validity tstzrange,
+	departure_airport text,
+	arrival_airport text,
+	airplane_code text,
+	days_of_week integer [],
+	scheduled_time time,
+	duration interval,
+		-- технические поля
+	raw_row_hash text not null, -- хеш строки для проверки изменений
+	last_seen_at timestamptz not null default now(), -- дата последнего фиксирование строки в source
+	-- Создание парных превичных ключей
+	constraint pk_raw_routes_snapshot primary key (route_no, validity)
+);
+	
+	
+	
