@@ -29,3 +29,31 @@ call ods.apply_airports_from_stage()
 
 select * from ods.airports a order by last_changed_at desc
 
+
+
+-- test stg.boarding_passes/ods.boarding_passes
+
+select distinct	batch_id from raw.boarding_passes
+
+call stg.load_boarding_passes_from_raw(27)
+
+select * from stg.boarding_passes limit 20
+
+call ods.apply_boarding_passes_from_stage()
+
+select * from ods.boarding_passes order by last_changed_at desc limit 20
+
+
+-- test stg.bookings/ods.bookings
+
+select distinct	batch_id from raw.bookings
+
+call stg.load_bookings_from_raw(8)
+
+select * from stg.bookings limit 20
+
+call ods.apply_bookings_from_stage()
+
+select * from ods.bookings order by last_changed_at desc limit 20
+
+

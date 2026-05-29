@@ -48,26 +48,30 @@ CREATE table if not exists stg.boarding_passes (
 	seat_no text ,
 	boarding_no int4 ,
 	boarding_time timestamptz ,
-	-- технические поля для аудита, lineage и имитации CDC
-	load_date timestamptz not null default now(), -- дата и время загрузки записи в DWH
-	record_source text not null, -- источник записи: таблица, файл, API и т.д.
+	-- технические поля
+	raw_load_date timestamptz not null, --дата и время, когда событие попало в RAW-слой
+	stg_load_date timestamptz not null default now(), --дата и время, когда строка была загружена в STAG
 	source_system text not null, -- исходная система, откуда пришли данные
-	batch_id bigint, -- идентификатор пакета загрузки
-	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	stg_row_hash text -- хеш строки для проверки изменений
+	record_source text not null, -- источник записи: таблица, файл, API и т.д.
+	batch_id bigint not null, -- идентификатор пакета загрузки
+	operation_type text not null, -- тип операции: I - insert, U - update, D - delete
+	is_valid boolean not null default true, --результат базовой проверки качества данных в STAGE
+	validation_error text --текст ошибки, если строка не прошла проверку
 );
 
 CREATE table if not exists stg.bookings (
 	book_ref text ,
 	book_date timestamptz ,
 	total_amount numeric(10, 2),
-	-- технические поля для аудита, lineage и имитации CDC
-	load_date timestamptz not null default now(), -- дата и время загрузки записи в DWH
-	record_source text not null, -- источник записи: таблица, файл, API и т.д.
+	-- технические поля
+	raw_load_date timestamptz not null, --дата и время, когда событие попало в RAW-слой
+	stg_load_date timestamptz not null default now(), --дата и время, когда строка была загружена в STAG
 	source_system text not null, -- исходная система, откуда пришли данные
-	batch_id bigint, -- идентификатор пакета загрузки
-	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	stg_row_hash text -- хеш строки для проверки изменений
+	record_source text not null, -- источник записи: таблица, файл, API и т.д.
+	batch_id bigint not null, -- идентификатор пакета загрузки
+	operation_type text not null, -- тип операции: I - insert, U - update, D - delete
+	is_valid boolean not null default true, --результат базовой проверки качества данных в STAGE
+	validation_error text --текст ошибки, если строка не прошла проверку
 
 );
 
