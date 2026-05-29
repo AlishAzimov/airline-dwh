@@ -23,20 +23,26 @@ CREATE table if not exists ods.airplanes (
 );
 
 
-CREATE table if not exists ods.airports_data (
-	airport_code text ,
-	airport_name jsonb ,
-	city jsonb ,
-	country jsonb ,
-	coordinates point ,
-	timezone text ,
-	-- технические поля для аудита, lineage и имитации CDC
-	load_date timestamptz not null default now(), -- дата и время загрузки записи в DWH
-	record_source text not null, -- источник записи: таблица, файл, API и т.д.
-	source_system text not null, -- исходная система, откуда пришли данные
-	batch_id bigint, -- идентификатор пакета загрузки
-	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	ods_row_hash text -- хеш строки для проверки изменений
+CREATE table if not exists ods.airports (
+    airport_code text not null,
+    airport_name_en text,
+    airport_name_ru text,
+    city_en text,
+    city_ru text,
+    country_en text,
+    country_ru text,
+    coordinates point,
+    timezone text,
+    -- технические поля
+    source_system text not null,      -- исходная система, откуда пришла строка
+    record_source text not null,      -- источник записи: таблица, файл, API и т.д.
+    created_batch_id bigint not null, -- batch, в котором строка впервые появилась в ODS
+    updated_batch_id bigint not null, -- последний batch, который изменил строку в ODS
+    last_changed_at timestamptz not null default now(), -- дата последнего изменения строки в ODS
+    is_deleted boolean not null default false, -- актуальна строка или удалена
+    last_operation_type text not null, -- последняя операция: I, U или D
+    
+    constraint pk_ods_airports primary key (airport_code)
 );
 
 CREATE table if not exists ods.boarding_passes (

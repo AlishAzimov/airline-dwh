@@ -1,40 +1,48 @@
 
 -----------------------------------------------------------------------------------------------
--- Создание таблиц слоя RAW: данные источника сохраняются в формате AS IS и технические поля --
+-- Создание таблиц слоя STAGE: данные источника сохраняются в формате AS IS и технические поля --
 -----------------------------------------------------------------------------------------------
 
 
-CREATE table if not exists raw.airplanes_data (
-	airplane_code text,
-	model jsonb,
+CREATE table if not exists stg.airplanes (
+	airplane_code text not null,
+	model_en text,
+	model_ru text,
 	"range" int4,
 	speed int4,
-	-- технические поля для аудита, lineage и имитации CDC
-	load_date timestamptz not null default now(), -- дата и время загрузки записи в DWH
-	record_source text not null, -- источник записи: таблица, файл, API и т.д.
+	-- технические поля
+	raw_load_date timestamptz not null, --дата и время, когда событие попало в RAW-слой
+	stg_load_date timestamptz not null default now(), --дата и время, когда строка была загружена в STAG
 	source_system text not null, -- исходная система, откуда пришли данные
-	batch_id bigint, -- идентификатор пакета загрузки
-	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	raw_row_hash text -- хеш строки для проверки изменений
+	record_source text not null, -- источник записи: таблица, файл, API и т.д.
+	batch_id bigint not null, -- идентификатор пакета загрузки
+	operation_type text not null, -- тип операции: I - insert, U - update, D - delete
+	is_valid boolean not null default true, --результат базовой проверки качества данных в STAGE
+	validation_error text --текст ошибки, если строка не прошла проверку
 );
 
-CREATE table if not exists raw.airports_data (
-	airport_code text ,
-	airport_name jsonb ,
-	city jsonb ,
-	country jsonb ,
-	coordinates point ,
-	timezone text ,
-	-- технические поля для аудита, lineage и имитации CDC
-	load_date timestamptz not null default now(), -- дата и время загрузки записи в DWH
-	record_source text not null, -- источник записи: таблица, файл, API и т.д.
+CREATE table if not exists stg.airports (
+    airport_code text not null,
+    airport_name_en text,
+    airport_name_ru text,
+    city_en text,
+    city_ru text,
+    country_en text,
+    country_ru text,
+    coordinates point,
+    timezone text,
+	-- технические поля
+	raw_load_date timestamptz not null, --дата и время, когда событие попало в RAW-слой
+	stg_load_date timestamptz not null default now(), --дата и время, когда строка была загружена в STAG
 	source_system text not null, -- исходная система, откуда пришли данные
-	batch_id bigint, -- идентификатор пакета загрузки
-	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	raw_row_hash text -- хеш строки для проверки изменений
+	record_source text not null, -- источник записи: таблица, файл, API и т.д.
+	batch_id bigint not null, -- идентификатор пакета загрузки
+	operation_type text not null, -- тип операции: I - insert, U - update, D - delete
+	is_valid boolean not null default true, --результат базовой проверки качества данных в STAGE
+	validation_error text --текст ошибки, если строка не прошла проверку
 );
 
-CREATE table if not exists raw.boarding_passes (
+CREATE table if not exists stg.boarding_passes (
 	ticket_no text ,
 	flight_id int4 ,
 	seat_no text ,
@@ -46,10 +54,10 @@ CREATE table if not exists raw.boarding_passes (
 	source_system text not null, -- исходная система, откуда пришли данные
 	batch_id bigint, -- идентификатор пакета загрузки
 	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	raw_row_hash text -- хеш строки для проверки изменений
+	stg_row_hash text -- хеш строки для проверки изменений
 );
 
-CREATE table if not exists raw.bookings (
+CREATE table if not exists stg.bookings (
 	book_ref text ,
 	book_date timestamptz ,
 	total_amount numeric(10, 2),
@@ -59,11 +67,11 @@ CREATE table if not exists raw.bookings (
 	source_system text not null, -- исходная система, откуда пришли данные
 	batch_id bigint, -- идентификатор пакета загрузки
 	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	raw_row_hash text -- хеш строки для проверки изменений
+	stg_row_hash text -- хеш строки для проверки изменений
 
 );
 
-CREATE table if not exists raw.flights (
+CREATE table if not exists stg.flights (
 	flight_id int4,
 	route_no text ,
 	status text,
@@ -77,10 +85,10 @@ CREATE table if not exists raw.flights (
 	source_system text not null, -- исходная система, откуда пришли данные
 	batch_id bigint, -- идентификатор пакета загрузки
 	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	raw_row_hash text -- хеш строки для проверки изменений
+	stg_row_hash text -- хеш строки для проверки изменений
 );
 
-CREATE table if not exists raw.routes (
+CREATE table if not exists stg.routes (
 	route_no text,
 	validity tstzrange,
 	departure_airport text,
@@ -95,10 +103,10 @@ CREATE table if not exists raw.routes (
 	source_system text not null, -- исходная система, откуда пришли данные
 	batch_id bigint, -- идентификатор пакета загрузки
 	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	raw_row_hash text -- хеш строки для проверки изменений
+	stg_row_hash text -- хеш строки для проверки изменений
 );
 
-CREATE table if not exists raw.seats (
+CREATE table if not exists stg.seats (
 	airplane_code text,
 	seat_no text,
 	fare_conditions text,
@@ -108,10 +116,10 @@ CREATE table if not exists raw.seats (
 	source_system text not null, -- исходная система, откуда пришли данные
 	batch_id bigint, -- идентификатор пакета загрузки
 	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	raw_row_hash text -- хеш строки для проверки изменений
+	stg_row_hash text -- хеш строки для проверки изменений
 );
 
-CREATE table if not exists raw.segments (
+CREATE table if not exists stg.segments (
 	ticket_no text,
 	flight_id int4,
 	fare_conditions text,
@@ -122,10 +130,10 @@ CREATE table if not exists raw.segments (
 	source_system text not null, -- исходная система, откуда пришли данные
 	batch_id bigint, -- идентификатор пакета загрузки
 	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	raw_row_hash text -- хеш строки для проверки изменений
+	stg_row_hash text -- хеш строки для проверки изменений
 );
 
-CREATE table if not exists raw.tickets (
+CREATE table if not exists stg.tickets (
 	ticket_no text,
 	book_ref text,
 	passenger_id text,
@@ -137,7 +145,7 @@ CREATE table if not exists raw.tickets (
 	source_system text not null, -- исходная система, откуда пришли данные
 	batch_id bigint, -- идентификатор пакета загрузки
 	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	raw_row_hash text -- хеш строки для проверки изменений
+	stg_row_hash text -- хеш строки для проверки изменений
 );
 
 	
