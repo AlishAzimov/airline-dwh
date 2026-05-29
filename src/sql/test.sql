@@ -56,4 +56,15 @@ call ods.apply_bookings_from_stage()
 
 select * from ods.bookings order by last_changed_at desc limit 20
 
+-- test stg.flightss/ods.flights
 
+select distinct	batch_id from raw.flights
+
+
+call stg.load_flights_from_raw()
+
+select * from stg.flights limit 20
+
+call ods.apply_flights_from_stage()
+
+select * from ods.flights order by last_changed_at desc limit 20

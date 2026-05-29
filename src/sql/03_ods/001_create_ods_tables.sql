@@ -88,13 +88,16 @@ CREATE table if not exists ods.flights (
 	scheduled_arrival timestamptz,
 	actual_departure timestamptz,
 	actual_arrival timestamptz,
-	-- технические поля для аудита, lineage и имитации CDC
-	load_date timestamptz not null default now(), -- дата и время загрузки записи в DWH
-	record_source text not null, -- источник записи: таблица, файл, API и т.д.
-	source_system text not null, -- исходная система, откуда пришли данные
-	batch_id bigint, -- идентификатор пакета загрузки
-	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	ods_row_hash text -- хеш строки для проверки изменений
+    -- технические поля
+    source_system text not null,      -- исходная система, откуда пришла строка
+    record_source text not null,      -- источник записи: таблица, файл, API и т.д.
+    created_batch_id bigint not null, -- batch, в котором строка впервые появилась в ODS
+    updated_batch_id bigint not null, -- последний batch, который изменил строку в ODS
+    last_changed_at timestamptz not null default now(), -- дата последнего изменения строки в ODS
+    is_deleted boolean not null default false, -- актуальна строка или удалена
+    last_operation_type text not null, -- последняя операция: I, U или D
+	
+	constraint pk_ods_flights primary key (flight_id)
 );
 
 CREATE table if not exists ods.routes (
