@@ -109,26 +109,32 @@ CREATE table if not exists ods.routes (
 	days_of_week integer [],
 	scheduled_time time,
 	duration interval,
-	-- технические поля для аудита, lineage и имитации CDC
-	load_date timestamptz not null default now(), -- дата и время загрузки записи в DWH
-	record_source text not null, -- источник записи: таблица, файл, API и т.д.
-	source_system text not null, -- исходная система, откуда пришли данные
-	batch_id bigint, -- идентификатор пакета загрузки
-	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	ods_row_hash text -- хеш строки для проверки изменений
+    -- технические поля
+    source_system text not null,      -- исходная система, откуда пришла строка
+    record_source text not null,      -- источник записи: таблица, файл, API и т.д.
+    created_batch_id bigint not null, -- batch, в котором строка впервые появилась в ODS
+    updated_batch_id bigint not null, -- последний batch, который изменил строку в ODS
+    last_changed_at timestamptz not null default now(), -- дата последнего изменения строки в ODS
+    is_deleted boolean not null default false, -- актуальна строка или удалена
+    last_operation_type text not null, -- последняя операция: I, U или D
+    
+    constraint pk_ods_routes primary key (route_no, validity)
 );
 
 CREATE table if not exists ods.seats (
 	airplane_code text,
 	seat_no text,
 	fare_conditions text,
-	-- технические поля для аудита, lineage и имитации CDC
-	load_date timestamptz not null default now(), -- дата и время загрузки записи в DWH
-	record_source text not null, -- источник записи: таблица, файл, API и т.д.
-	source_system text not null, -- исходная система, откуда пришли данные
-	batch_id bigint, -- идентификатор пакета загрузки
-	operation_type text not null default 'I', -- тип операции: I - insert, U - update, D - delete
-	ods_row_hash text -- хеш строки для проверки изменений
+    -- технические поля
+    source_system text not null,      -- исходная система, откуда пришла строка
+    record_source text not null,      -- источник записи: таблица, файл, API и т.д.
+    created_batch_id bigint not null, -- batch, в котором строка впервые появилась в ODS
+    updated_batch_id bigint not null, -- последний batch, который изменил строку в ODS
+    last_changed_at timestamptz not null default now(), -- дата последнего изменения строки в ODS
+    is_deleted boolean not null default false, -- актуальна строка или удалена
+    last_operation_type text not null, -- последняя операция: I, U или D
+    
+    constraint pk_ods_seats primary key (airplane_code, seat_no)
 );
 
 CREATE table if not exists ods.segments (

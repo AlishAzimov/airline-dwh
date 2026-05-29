@@ -44,6 +44,7 @@ call ods.apply_boarding_passes_from_stage()
 select * from ods.boarding_passes order by last_changed_at desc limit 20
 
 
+
 -- test stg.bookings/ods.bookings
 
 select distinct	batch_id from raw.bookings
@@ -56,10 +57,12 @@ call ods.apply_bookings_from_stage()
 
 select * from ods.bookings order by last_changed_at desc limit 20
 
+
+
+
 -- test stg.flightss/ods.flights
 
 select distinct	batch_id from raw.flights
-
 
 call stg.load_flights_from_raw()
 
@@ -68,3 +71,30 @@ select * from stg.flights limit 20
 call ods.apply_flights_from_stage()
 
 select * from ods.flights order by last_changed_at desc limit 20
+
+
+
+-- test stg.routes/ods.routes
+
+select distinct	batch_id from raw.routes
+
+call stg.load_routes_from_raw()
+
+select * from stg.routes limit 20
+
+call ods.apply_routes_from_stage()
+
+select * from ods.routes order by last_changed_at desc limit 20
+
+
+-- test stg.seats/ods.seats
+
+select distinct	batch_id from raw.seats
+
+call stg.load_seats_from_raw()
+
+select * from stg.seats limit 20
+
+call ods.apply_seats_from_stage()
+
+select * from ods.seats order by last_changed_at desc limit 20
