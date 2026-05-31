@@ -98,3 +98,30 @@ select * from stg.seats limit 20
 call ods.apply_seats_from_stage()
 
 select * from ods.seats order by last_changed_at desc limit 20
+
+
+
+-- test stg.segments/ods.segments
+
+select distinct	batch_id from raw.segments
+
+call stg.load_segments_from_raw()
+
+select * from stg.segments limit 20
+
+call ods.apply_segments_from_stage()
+
+select * from ods.segments order by last_changed_at desc limit 20
+
+
+-- test stg.tickets/ods.tickets 
+
+select distinct	batch_id from raw.tickets 
+
+call stg.load_tickets_from_raw()
+
+select * from stg.tickets limit 20
+
+call ods.apply_tickets_from_stage()
+
+select * from ods.tickets order by last_changed_at desc limit 20
