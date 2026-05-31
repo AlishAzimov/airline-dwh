@@ -1,4 +1,87 @@
 
+--------------------------------------------------------------------------------------------------------
+-- TEST DDS --
+--------------------------------------------------------------------------------------------------------
+
+-- test dds.dim_airplanes
+
+call dds.load_dim_airplanes_from_ods()
+
+
+select * from dds.dim_airplanes a 
+
+insert into source_fdw.airplanes_data (
+    airplane_code,
+    model,
+    "range",
+    speed
+)
+values (
+    '740',
+    '{"en": "Boeing 737-800", "ru": "Боинг 737-800"}'::jsonb,
+   5765,
+    850
+);
+
+
+update source_fdw.airplanes_data
+set speed = 855
+where airplane_code = '76F';
+
+call meta.load_airplanes_pipeline()
+
+delete from source_fdw.airplanes_data
+where airplane_code='738';
+
+call meta.load_airplanes_pipeline()
+
+
+
+-- test dds.dim_airports
+
+
+call dds.load_dim_airports_from_ods()
+
+select * from dds.dim_airports a 
+where country_en ilike 'uzb%' 
+
+
+
+insert into source_fdw.airports_data (
+    airport_code,
+    airport_name,
+    city,
+    country,
+    coordinates,
+    timezone
+)
+values (
+    'UGH',
+    '{"en": "Urgench", "ru": "Ургенч"}'::jsonb,
+    '{"en": "Urgench", "ru": "Ургенч"}'::jsonb,
+    '{"en": "Uzbekistan", "ru": "Узбекистан"}'::jsonb,
+    point(60.6417, 41.5843),
+    'Asia/Samarkand'
+);
+
+
+update source_fdw.airports_data
+set 
+	timezone='Asia/Tashkent'
+where  airport_code='NVI'
+
+delete from source_fdw.airports_data
+where airport_code='UGH';
+
+call meta.load_airports_pipeline()
+
+
+--------------------------------------------------------------------------------------------------------
+-- TEST STG and ODS --
+--------------------------------------------------------------------------------------------------------
+
+
+
 -- test stg.airplanes/ods.airplanes
 
 
