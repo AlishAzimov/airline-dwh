@@ -58,6 +58,35 @@ create unique index if not exists uq_dds_dim_airport_current
 on dds.dim_airports (airport_code)
 where is_current = true;    
     
+
+-- SCD2-измерение маошрутов: хранит историю изменений по route_no и validity
+CREATE table if not exists dds.dim_routes (
+	routes_sk bigint generated always as identity, -- surrogate key	
+	route_no text,
+	validity tstzrange,
+	departure_airport text,
+	arrival_airport text,
+	airplane_code text,
+	days_of_week integer [],
+	scheduled_time time,
+	duration interval,
+  	-- технические поля
+    source_system text not null,      -- исходная система, откуда пришла строка
+    record_source text not null,      -- источник записи: таблица, файл, API и т.д.
+    valid_from timestamptz not null default now(), -- с какого момента версия актуальна
+    valid_to timestamptz not null default '9999-12-31'::timestamptz, -- до какого момента версия актуальна
+	is_current boolean not null default true, -- текущая ли версия
+    batch_id bigint not null, -- batch, который создал или последний раз изменил статус версии
+    
+    constraint pk_dds_routes primary key (routes_sk),
+    constraint chk_dds_routes_valid_period check (valid_to > valid_from) -- чек правильного заполнение дат
+);
+
+create unique index if not exists uq_dds_dim_routes_current
+on dds.dim_routes (route_no, validity)
+where is_current = true;    
+    
+
     
 CREATE table if not exists dds.boarding_passes (
 	ticket_no text ,
@@ -114,26 +143,6 @@ CREATE table if not exists dds.flights (
 	constraint pk_dds_flights primary key (flight_id)
 );
 
-CREATE table if not exists dds.routes (
-	route_no text,
-	validity tstzrange,
-	departure_airport text,
-	arrival_airport text,
-	airplane_code text,
-	days_of_week integer [],
-	scheduled_time time,
-	duration interval,
-    -- технические поля
-    source_system text not null,      -- исходная система, откуда пришла строка
-    record_source text not null,      -- источник записи: таблица, файл, API и т.д.
-    created_batch_id bigint not null, -- batch, в котором строка впервые появилась в dds
-    updated_batch_id bigint not null, -- последний batch, который изменил строку в dds
-    last_changed_at timestamptz not null default now(), -- дата последнего изменения строки в dds
-    is_deleted boolean not null default false, -- актуальна строка или удалена
-    last_operation_type text not null, -- последняя операция: I, U или D
-    
-    constraint pk_dds_routes primary key (route_no, validity)
-);
 
 CREATE table if not exists dds.seats (
 	airplane_code text,

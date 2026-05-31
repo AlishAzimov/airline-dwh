@@ -76,6 +76,14 @@ where airport_code='UGH';
 call meta.load_airports_pipeline()
 
 
+
+
+-- test dds.dim_routes
+
+call dds.load_dim_routes_from_ods()
+
+select * from dds.dim_routes
+
 --------------------------------------------------------------------------------------------------------
 -- TEST STG and ODS --
 --------------------------------------------------------------------------------------------------------
