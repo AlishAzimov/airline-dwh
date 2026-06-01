@@ -84,6 +84,71 @@ call dds.load_dim_routes_from_ods()
 
 select * from dds.dim_routes
 
+
+
+insert into 
+	source_fdw.routes(
+	 	route_no,
+		validity,
+		departure_airport,
+		arrival_airport,
+		airplane_code,
+		days_of_week,
+		scheduled_time,
+		duration)
+values ('PG1900',
+		'["2027-11-01 05:00:00+05","2027-12-01 05:00:00+05")'::tstzrange, 
+		'DEN', 
+		'ARN', 
+		'789',
+		array[2, 4, 6],
+		'11:00:00',
+		 interval '10 hours'
+		);
+
+
+
+update source_fdw.routes
+set 
+	days_of_week=array[1, 3, 5]
+where route_no='PG0167' and validity = '["2027-10-01 05:00:00+05","2027-11-01 05:00:00+05")'::tstzrange;
+
+
+delete from source_fdw.routes
+where route_no='PG1797' and validity = '["2027-10-01 05:00:00+05","2027-11-01 05:00:00+05")'::tstzrange;
+
+
+call meta.load_routes_pipeline()
+
+-- test dds.dim_routes seats
+
+call meta.load_seats_pipeline()
+
+select * from dds.dim_seats order by batch_id desc
+
+select distinct batch_id from dds.dim_seats 
+
+
+insert into source_fdw.seats (
+    airplane_code,
+	seat_no,
+	fare_conditions
+)
+values (
+    '32N',
+    '0B',
+    'Business'
+);
+
+
+update source_fdw.seats
+set fare_conditions = 'Comfort'
+where airplane_code = '32N' and seat_no = '0B';
+
+delete from source_fdw.seats
+where airplane_code = '32N' and seat_no = '0B';
+
+
 --------------------------------------------------------------------------------------------------------
 -- TEST STG and ODS --
 --------------------------------------------------------------------------------------------------------
