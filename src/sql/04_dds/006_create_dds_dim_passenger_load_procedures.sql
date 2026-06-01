@@ -57,9 +57,7 @@ begin
     raise notice 'dds.upsert_dim_passenger_from_ods duration: %',
         clock_timestamp() - v_step_started_at;
 
-    raise notice 'dds.dim_passenger loaded. rows = %, active rows = %, deleted rows = %',
-        (select count(*) from dds.dim_passenger),
-        (select count(*) from dds.dim_passenger where is_deleted = false),
-        (select count(*) from dds.dim_passenger where is_deleted = true);
+    raise notice 'dds.dim_passenger loaded. rows = %',
+        (select count(*) from dds.dim_passenger);
 end;
 $$;

@@ -159,6 +159,34 @@ create table if not exists dds.dim_passenger (
 );
 
 
+-- Факт рейсов: хранит актуальное состояние рейсов из таблицы flights
+CREATE table if not exists dds.fact_flights (
+    flight_sk bigint generated always as identity, -- surrogate key
+    route_sk bigint,-- surrogate key из DDS
+	flight_id int4 not null,
+	route_no text,
+	status text,
+	scheduled_departure timestamptz,
+	scheduled_arrival timestamptz,
+	actual_departure timestamptz,
+	actual_arrival timestamptz,
+    -- технические поля
+    source_system text not null,      -- исходная система, откуда пришла строка
+    record_source text not null,      -- источник записи: таблица, файл, API и т.д.
+    batch_id bigint not null, -- batch, который создал или последний раз обновил строку
+    last_changed_at timestamptz not null default now(), -- дата последнего изменения строки в dds
+    is_deleted boolean not null default false, -- актуальна строка или удалена
+	
+	constraint pk_dds_fact_flights primary key (flight_sk),
+	constraint uq_dds_fact_flights_source_key unique (flight_id),
+	constraint fk_dds_fact_flights_routes foreign key (route_sk) references dds.dim_routes(route_sk),
+	
+	--check 
+	constraint chk_dds_fact_flights_sch check (scheduled_departure < scheduled_arrival),  
+	constraint chk_dds_fact_flights_act check (actual_arrival is null or (actual_departure is not null and actual_departure < actual_arrival))  
+);
+
+
     
 CREATE table if not exists dds.boarding_passes (
 	ticket_no text ,
@@ -195,25 +223,6 @@ CREATE table if not exists dds.bookings (
 
 );
 
-CREATE table if not exists dds.flights (
-	flight_id int4,
-	route_no text ,
-	status text,
-	scheduled_departure timestamptz,
-	scheduled_arrival timestamptz,
-	actual_departure timestamptz,
-	actual_arrival timestamptz,
-    -- технические поля
-    source_system text not null,      -- исходная система, откуда пришла строка
-    record_source text not null,      -- источник записи: таблица, файл, API и т.д.
-    created_batch_id bigint not null, -- batch, в котором строка впервые появилась в dds
-    updated_batch_id bigint not null, -- последний batch, который изменил строку в dds
-    last_changed_at timestamptz not null default now(), -- дата последнего изменения строки в dds
-    is_deleted boolean not null default false, -- актуальна строка или удалена
-    last_operation_type text not null, -- последняя операция: I, U или D
-	
-	constraint pk_dds_flights primary key (flight_id)
-);
 
 
 CREATE table if not exists dds.seats (

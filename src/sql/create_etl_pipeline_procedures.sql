@@ -57,3 +57,17 @@ begin
 	call dds.load_dim_seats_from_ods();
 end;
 $$;
+
+
+-- Pipeline загрузки маршрутов: RAW delta - STAGE - ODS - DDS
+create or replace procedure meta.load_flights_pipeline()
+language plpgsql
+as $$
+begin
+	
+	call raw.load_flights_delta();
+	call stg.load_flights_from_raw();
+	call ods.apply_flights_from_stage();
+	call dds.load_fact_flights_from_ods();
+end;
+$$;

@@ -158,6 +158,20 @@ from dds.dim_passenger
 limit 10
 
 
+
+-- test dds.fact_flights
+
+call dds.load_fact_flights_from_ods()
+
+select *
+from dds.fact_flights
+where is_deleted = true
+limit 10
+
+call meta.load_flights_pipeline()
+
+
+
 --------------------------------------------------------------------------------------------------------
 -- TEST STG and ODS --
 --------------------------------------------------------------------------------------------------------
