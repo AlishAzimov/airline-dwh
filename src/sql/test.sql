@@ -149,6 +149,15 @@ delete from source_fdw.seats
 where airplane_code = '32N' and seat_no = '0B';
 
 
+-- test dds.dim_passanger 
+
+call dds.upsert_dim_passenger_from_ods()
+
+select *
+from dds.dim_passenger
+limit 10
+
+
 --------------------------------------------------------------------------------------------------------
 -- TEST STG and ODS --
 --------------------------------------------------------------------------------------------------------

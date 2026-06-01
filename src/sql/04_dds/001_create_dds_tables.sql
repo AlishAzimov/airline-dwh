@@ -140,6 +140,25 @@ create table if not exists dds.dim_seats (
 );
 
 
+-- SCD1-измерение Пассажиры, берем из таблицы tickets 
+create table if not exists dds.dim_passenger (
+    passenger_sk bigint generated always as identity, -- surrogate key
+
+    passenger_id text not null,
+	passenger_name text,
+    
+    -- технические поля
+    source_system text not null,      -- исходная система, откуда пришла строка
+    record_source text not null,      -- источник записи: таблица, файл, API и т.д.
+ 	batch_id bigint not null, -- batch, который создал или последний раз обновил строку
+    last_changed_at timestamptz not null default now()
+
+    constraint pk_dds_dim_passenger primary key (passenger_sk),
+    constraint uq_dds_dim_passenger_passenger_id unique (passenger_id)
+
+);
+
+
     
 CREATE table if not exists dds.boarding_passes (
 	ticket_no text ,
