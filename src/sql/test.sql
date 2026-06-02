@@ -172,6 +172,18 @@ call meta.load_flights_pipeline()
 
 
 
+-- test dds.fact_bookings
+
+call dds.load_fact_bookings_from_ods(); 
+
+select * from dds.fact_bookings order by last_changed_at desc limit 20
+
+update source_fdw.bookings
+set total_amount = 4500.00
+where book_ref = '96IRDX';
+
+call meta.load_bookings_pipeline()
+
 --------------------------------------------------------------------------------------------------------
 -- TEST STG and ODS --
 --------------------------------------------------------------------------------------------------------
