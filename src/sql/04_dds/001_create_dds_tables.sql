@@ -227,6 +227,34 @@ CREATE table if not exists dds.fact_tickets (
 );
 
 
+create table if not exists dds.fact_segments (
+    segment_sk bigint generated always as identity, -- surrogate key
+    ticket_sk bigint,-- surrogate keys из DDS
+    flight_sk bigint,-- surrogate keys из DDS
+
+
+    ticket_no text not null,
+    flight_id int4 not null,
+    fare_conditions text,
+    price numeric(10, 2),
+    -- технические поля
+    source_system text not null,      -- исходная система, откуда пришла строка
+    record_source text not null,      -- источник записи: таблица, файл, API и т.д.
+    batch_id bigint not null,         -- batch, который создал или последний раз обновил строку
+    last_changed_at timestamptz not null default now(), -- дата последнего изменения строки в DDS
+    is_deleted boolean not null default false, -- актуальна строка или удалена
+
+    constraint pk_dds_fact_segments primary key (segment_sk),
+
+    constraint uq_dds_fact_segments_source_key unique (ticket_no, flight_id),
+
+    constraint fk_dds_fact_segments_ticket foreign key (ticket_sk) references dds.fact_tickets (ticket_sk),
+
+    constraint fk_dds_fact_segments_flight foreign key (flight_sk) references dds.fact_flights (flight_sk)
+);
+
+
+
     
 CREATE table if not exists dds.boarding_passes (
 	ticket_no text ,
@@ -247,38 +275,7 @@ CREATE table if not exists dds.boarding_passes (
 );
 
 
-CREATE table if not exists dds.seats (
-	airplane_code text,
-	seat_no text,
-	fare_conditions text,
-    -- технические поля
-    source_system text not null,      -- исходная система, откуда пришла строка
-    record_source text not null,      -- источник записи: таблица, файл, API и т.д.
-    created_batch_id bigint not null, -- batch, в котором строка впервые появилась в dds
-    updated_batch_id bigint not null, -- последний batch, который изменил строку в dds
-    last_changed_at timestamptz not null default now(), -- дата последнего изменения строки в dds
-    is_deleted boolean not null default false, -- актуальна строка или удалена
-    last_operation_type text not null, -- последняя операция: I, U или D
-    
-    constraint pk_dds_seats primary key (airplane_code, seat_no)
-);
 
-CREATE table if not exists dds.segments (
-	ticket_no text,
-	flight_id int4,
-	fare_conditions text,
-	price numeric(10, 2),
-    -- технические поля
-    source_system text not null,      -- исходная система, откуда пришла строка
-    record_source text not null,      -- источник записи: таблица, файл, API и т.д.
-    created_batch_id bigint not null, -- batch, в котором строка впервые появилась в dds
-    updated_batch_id bigint not null, -- последний batch, который изменил строку в dds
-    last_changed_at timestamptz not null default now(), -- дата последнего изменения строки в dds
-    is_deleted boolean not null default false, -- актуальна строка или удалена
-    last_operation_type text not null, -- последняя операция: I, U или D
-    
-    constraint pk_dds_segments primary key (ticket_no, flight_id)
-    );
 
 
 	

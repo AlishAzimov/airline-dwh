@@ -202,6 +202,22 @@ values ('0005453207701', 'OJ1F1D', 'UZ 9000000000001', 'Ali Azimov', false);
 
 call meta.load_tickets_pipeline();
 
+
+-- test dds.fact_segments
+
+call dds.load_fact_segments_from_ods();
+
+select * from dds.fact_segments limit 10 
+
+update source_fdw.segments
+set 
+	fare_conditions='Comfort',
+	price=10001.00
+where ticket_no='0005453207644' 
+and flight_id=135087
+
+call meta.load_segments_pipeline()
+
 --------------------------------------------------------------------------------------------------------
 -- TEST STG and ODS --
 --------------------------------------------------------------------------------------------------------

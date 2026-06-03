@@ -102,3 +102,15 @@ end;
 $$;
 
 
+-- Pipeline загрузки маршрутов: RAW delta - STAGE - ODS - DDS
+create or replace procedure meta.load_segments_pipeline()
+language plpgsql
+as $$
+begin
+	
+	call raw.load_segments_delta();
+	call stg.load_segments_from_raw();
+	call ods.apply_segments_from_stage();
+	call dds.load_fact_segments_from_ods();
+end;
+$$;
