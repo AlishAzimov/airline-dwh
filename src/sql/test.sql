@@ -184,6 +184,24 @@ where book_ref = '96IRDX';
 
 call meta.load_bookings_pipeline()
 
+
+-- test dds.fact_tickets
+
+call dds.load_fact_tickets_from_ods();
+
+select * from dds.fact_tickets where ticket_no ='0005453207701'
+
+insert into 
+	source_fdw.tickets(
+			ticket_no,
+			book_ref,
+			passenger_id,
+			passenger_name,
+			outbound)
+values ('0005453207701', 'OJ1F1D', 'UZ 9000000000001', 'Ali Azimov', false);
+
+call meta.load_tickets_pipeline();
+
 --------------------------------------------------------------------------------------------------------
 -- TEST STG and ODS --
 --------------------------------------------------------------------------------------------------------

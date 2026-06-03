@@ -7,7 +7,15 @@
 create or replace procedure dds.upsert_fact_flights_from_ods()
 language plpgsql
 as $$
+
+declare
+    v_last_loaded_batch_id bigint;
+
 begin
+
+    select coalesce(max(batch_id), 0)
+    into v_last_loaded_batch_id
+    from dds.fact_flights;
 
 insert into dds.fact_flights(
 		route_sk,
@@ -43,7 +51,8 @@ insert into dds.fact_flights(
 			on o.route_no=r.route_no
 			and o.scheduled_departure <@ r.validity
 			and r.is_current = true		
-
+	where o.updated_batch_id > v_last_loaded_batch_id
+	
 	on conflict (flight_id) do update
     set
 		route_sk = excluded.route_sk,
@@ -57,8 +66,7 @@ insert into dds.fact_flights(
 	    record_source = excluded.record_source,     
 	    batch_id = excluded.batch_id, 
 	    last_changed_at= now(), 
-	    is_deleted = excluded.is_deleted
-	where dds.fact_flights.batch_id != excluded.batch_id;
+	    is_deleted = excluded.is_deleted;
 
 end;
 $$;

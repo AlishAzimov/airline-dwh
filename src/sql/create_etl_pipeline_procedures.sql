@@ -86,3 +86,19 @@ begin
 	call dds.load_fact_bookings_from_ods();
 end;
 $$;
+
+-- Pipeline загрузки маршрутов: RAW delta - STAGE - ODS - DDS
+create or replace procedure meta.load_tickets_pipeline()
+language plpgsql
+as $$
+begin
+	
+	call raw.load_tickets_delta();
+	call stg.load_tickets_from_raw();
+	call ods.apply_tickets_from_stage();
+	call dds.load_dim_passenger_from_ods(); -- формирование SCD1-измерения пассажиров на основе ods.tickets
+	call dds.load_fact_tickets_from_ods();
+end;
+$$;
+
+

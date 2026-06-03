@@ -8,7 +8,15 @@
 create or replace procedure dds.upsert_fact_bookings_from_ods()
 language plpgsql
 as $$
+
+declare
+    v_last_loaded_batch_id bigint;
+
 begin
+	
+    select coalesce(max(batch_id), 0)
+    into v_last_loaded_batch_id
+    from dds.fact_bookings;
 
     insert into dds.fact_bookings (
         book_ref,
@@ -30,6 +38,7 @@ begin
         now() as last_changed_at,
         o.is_deleted
     from ods.bookings o
+	where o.updated_batch_id > v_last_loaded_batch_id
 
     on conflict (book_ref) do update
     set
@@ -39,8 +48,7 @@ begin
         record_source = excluded.record_source,
         batch_id = excluded.batch_id,
         last_changed_at = now(),
-        is_deleted = excluded.is_deleted
-    where dds.fact_bookings.batch_id != excluded.batch_id;
+        is_deleted = excluded.is_deleted;
 
 end;
 $$;

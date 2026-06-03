@@ -7,7 +7,14 @@
 create or replace procedure dds.upsert_dim_passenger_from_ods()
 language plpgsql
 as $$
+
+declare
+    v_last_loaded_batch_id bigint;
 begin
+
+    select coalesce(max(batch_id), 0)
+    into v_last_loaded_batch_id
+    from dds.dim_passenger;
 
 insert into dds.dim_passenger(
 		passenger_id,
@@ -25,17 +32,17 @@ insert into dds.dim_passenger(
 	    o.updated_batch_id as batch_id,
 		now() as last_changed_at
 	from ods.tickets o
-	where passenger_id is not null
+	where passenger_id is not null 
+	and o.updated_batch_id > v_last_loaded_batch_id
 	order by passenger_id, updated_batch_id desc
-
+	
 	on conflict (passenger_id) do update
     set
         passenger_name = excluded.passenger_name,
         source_system = excluded.source_system,
         record_source = excluded.record_source,
         batch_id = excluded.batch_id,
-        last_changed_at = now()
-	where dds.dim_passenger.batch_id != excluded.batch_id;
+        last_changed_at = now();
 
 end;
 $$;
