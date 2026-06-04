@@ -232,7 +232,6 @@ create table if not exists dds.fact_segments (
     ticket_sk bigint,-- surrogate keys из DDS
     flight_sk bigint,-- surrogate keys из DDS
 
-
     ticket_no text not null,
     flight_id int4 not null,
     fare_conditions text,
@@ -256,27 +255,33 @@ create table if not exists dds.fact_segments (
 
 
     
-CREATE table if not exists dds.boarding_passes (
-	ticket_no text ,
-	flight_id int4 ,
-	seat_no text ,
-	boarding_no int4 ,
-	boarding_time timestamptz ,
-    -- технические поля
+CREATE table if not exists dds.fact_boarding_passes (
+	boarding_pass_sk bigint generated always as identity, -- surrogate key	
+    ticket_sk bigint,-- surrogate keys из DDS
+    flight_sk bigint,-- surrogate keys из DDS
+
+	ticket_no text,
+	flight_id int4,
+	seat_no text,
+	boarding_no int4,
+	boarding_time timestamptz,
+	-- технические поля
     source_system text not null,      -- исходная система, откуда пришла строка
     record_source text not null,      -- источник записи: таблица, файл, API и т.д.
-    created_batch_id bigint not null, -- batch, в котором строка впервые появилась в dds
-    updated_batch_id bigint not null, -- последний batch, который изменил строку в dds
-    last_changed_at timestamptz not null default now(), -- дата последнего изменения строки в dds
+    batch_id bigint not null,         -- batch, который создал или последний раз обновил строку
+    last_changed_at timestamptz not null default now(), -- дата последнего изменения строки в DDS
     is_deleted boolean not null default false, -- актуальна строка или удалена
-    last_operation_type text not null, -- последняя операция: I, U или D
-	
-    constraint pk_dds_boarding_passes primary key (ticket_no, flight_id)
+    
+    constraint pk_dds_fact_boarding_passes primary key (boarding_passes_sk),
+    constraint uq_dds_fact_boarding_passes unique (ticket_no, flight_id),
+    constraint fk_dds_fact_boarding_passes_ticket foreign key (ticket_sk) references dds.fact_tickets (ticket_sk),
+    constraint fk_dds_fact_boarding_passes_flight foreign key (flight_sk) references dds.fact_flights (flight_sk)
+
 );
 
 
 
-
+drop table dds.fact_boarding_passes
 
 	
 

@@ -114,3 +114,17 @@ begin
 	call dds.load_fact_segments_from_ods();
 end;
 $$;
+
+
+-- Pipeline загрузки маршрутов: RAW delta - STAGE - ODS - DDS
+create or replace procedure meta.load_boarding_passes_pipeline()
+language plpgsql
+as $$
+begin
+	
+	call raw.load_boarding_passes_delta();
+	call stg.load_boarding_passes_from_raw();
+	call ods.apply_boarding_passes_from_stage();
+	call dds.load_fact_boarding_passes_from_ods();
+end;
+$$;

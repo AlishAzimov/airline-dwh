@@ -207,7 +207,7 @@ call meta.load_tickets_pipeline();
 
 call dds.load_fact_segments_from_ods();
 
-select * from dds.fact_segments limit 10 
+select * from dds.fact_segments order by batch_id desc limit 10 
 
 update source_fdw.segments
 set 
@@ -217,6 +217,9 @@ where ticket_no='0005453207644'
 and flight_id=135087
 
 call meta.load_segments_pipeline()
+
+
+
 
 --------------------------------------------------------------------------------------------------------
 -- TEST STG and ODS --
