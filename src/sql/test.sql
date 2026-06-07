@@ -219,7 +219,19 @@ and flight_id=135087
 call meta.load_segments_pipeline()
 
 
+-- test dds.boarding_passes
 
+call dds.load_fact_boarding_passes_from_ods();
+
+select * from dds.fact_boarding_passes order by batch_id desc, ticket_sk asc limit 10
+
+update source_fdw.boarding_passes
+set 
+	boarding_no=3000
+where ticket_no='0005432253980' 
+and flight_id=27
+
+call meta.load_boarding_passes_pipeline();
 
 --------------------------------------------------------------------------------------------------------
 -- TEST STG and ODS --

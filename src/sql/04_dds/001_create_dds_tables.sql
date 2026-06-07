@@ -272,16 +272,12 @@ CREATE table if not exists dds.fact_boarding_passes (
     last_changed_at timestamptz not null default now(), -- дата последнего изменения строки в DDS
     is_deleted boolean not null default false, -- актуальна строка или удалена
     
-    constraint pk_dds_fact_boarding_passes primary key (boarding_passes_sk),
+    constraint pk_dds_fact_boarding_passes primary key (boarding_pass_sk),
     constraint uq_dds_fact_boarding_passes unique (ticket_no, flight_id),
     constraint fk_dds_fact_boarding_passes_ticket foreign key (ticket_sk) references dds.fact_tickets (ticket_sk),
     constraint fk_dds_fact_boarding_passes_flight foreign key (flight_sk) references dds.fact_flights (flight_sk)
 
 );
-
-
-
-drop table dds.fact_boarding_passes
 
 	
 
