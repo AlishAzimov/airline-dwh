@@ -9,19 +9,30 @@ call dm.load_flight_sales_mart_from_dds()
 select * from dm.flight_sales_mart order by source_max_batch_id desc limit 30;
 
 
+update source_fdw.segments
+set 
+	fare_conditions='Economy',
+	price=50000.00
+where ticket_no='0005453207644' 
+and flight_id=135087
 
--- test dm.flight_sales_mart
+-- test dm.flight_revenue_mart
 
-call dm.load_flight_sales_mart_from_dds()
+call dm.load_flight_revenue_mart_from_flight_sales_mart()
 
 
 select * from dm.flight_revenue_mart limit 20 
 
 
+-- test dm.airport_traffic_daily
 
+call dm.load_airport_traffic_daily_from_flight_sales_mart()
 
+select * from dm.airport_traffic_daily limit 20
 
+-- 
 
+call meta.load_data_mart_pipeline()
 
 --------------------------------------------------------------------------------------------------------
 -- TEST DDS --

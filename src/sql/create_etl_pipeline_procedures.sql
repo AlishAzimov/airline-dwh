@@ -127,4 +127,32 @@ begin
 	call ods.apply_boarding_passes_from_stage();
 	call dds.load_fact_boarding_passes_from_ods();
 end;
+$$;.
+
+--------------------------------------------------------------------------------------------------------
+-- Главный pipeline загрузки данных: RAW → STAGE → ODS → DDS → DM
+-- Последовательно обновляет справочники, факты и аналитические витрины для BI
+--------------------------------------------------------------------------------------------------------
+
+create or replace procedure meta.load_data_mart_pipeline()
+language plpgsql
+as $$
+begin
+	-- Загрузка справочников и фактов в DDS
+	call meta.load_airplanes_pipeline();
+	call meta.load_airports_pipeline();
+	call meta.load_routes_pipeline();
+	call meta.load_flights_pipeline();	
+	call meta.load_bookings_pipeline();	
+	call meta.load_tickets_pipeline();	
+	call meta.load_segments_pipeline();
+
+	-- Загрузка и пересчёт DM-витрин для BI
+	call dm.load_flight_sales_mart_from_dds();
+	call dm.load_flight_revenue_mart_from_flight_sales_mart();
+	call dm.load_airport_traffic_daily_from_flight_sales_mart();
+end;
 $$;
+
+
+

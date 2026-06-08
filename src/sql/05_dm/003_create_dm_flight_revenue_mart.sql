@@ -55,7 +55,7 @@ $$;
 
 -- Главная сборочная процедура
 
-create or replace procedure dm.load_flight_sales_mart_from_dds()
+create or replace procedure dm.load_flight_revenue_mart_from_flight_sales_mart()
 language plpgsql
 as $$
 declare
