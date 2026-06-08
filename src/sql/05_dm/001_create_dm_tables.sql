@@ -38,7 +38,7 @@ create table if not exists dm.flight_sales_mart (
 
 
 
-create table if not excists dm.flight_revenue_mart (
+create table if not exists dm.flight_revenue_mart (
 		
 		flight_id int4 not null,
 		passenger_count int4,
@@ -57,6 +57,8 @@ create table if not excists dm.flight_revenue_mart (
 		departure_airport_name text,
 		arrival_airport_name text,
 	    airplane_model text,
+	    
+	    constraint pk_dm_flight_revenue_mart primary key (flight_id)
 )
 
 

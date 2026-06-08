@@ -1,3 +1,27 @@
+--------------------------------------------------------------------------------------------------------
+-- TEST DM --
+--------------------------------------------------------------------------------------------------------
+
+-- test dm.flight_sales_mart
+
+call dm.load_flight_sales_mart_from_dds()
+
+select * from dm.flight_sales_mart order by source_max_batch_id desc limit 30;
+
+
+
+-- test dm.flight_sales_mart
+
+call dm.load_flight_sales_mart_from_dds()
+
+
+select * from dm.flight_revenue_mart limit 20 
+
+
+
+
+
+
 
 --------------------------------------------------------------------------------------------------------
 -- TEST DDS --
@@ -211,8 +235,8 @@ select * from dds.fact_segments order by batch_id desc limit 10
 
 update source_fdw.segments
 set 
-	fare_conditions='Comfort',
-	price=10001.00
+	fare_conditions='Economy',
+	price=500.00
 where ticket_no='0005453207644' 
 and flight_id=135087
 
