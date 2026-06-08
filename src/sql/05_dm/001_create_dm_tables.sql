@@ -1,71 +1,105 @@
-
 -----------------------------------------------------------------------------------------------
--- Создание таблиц слоя DDS: измерения и факты для аналитической модели данных --
+-- Создание таблиц слоя DM: готовые витрины данных для BI-отчётов и Superset --
 -----------------------------------------------------------------------------------------------
 
-CREATE TABLE IF NOT EXISTS dm.flight_sales_mart (
+-- Детальная витрина продаж: 1 строка = 1 сегмент билета ticket_no + flight_id
+create table if not exists dm.flight_sales_mart (
+    ticket_no text not null,
+    flight_id int4 not null,
+
+    passenger_id text,
+    route_no text,
+    book_ref text,
+
+    total_amount numeric(10, 2),
+    price numeric(10, 2),
+    fare_conditions text,
+    outbound boolean,
+
+    book_date timestamptz,
+
+    status text,
+    scheduled_departure timestamptz,
+    scheduled_arrival timestamptz,
+    actual_departure timestamptz,
+    actual_arrival timestamptz,
+    duration interval,
+
+    departure_airport_name text,
+    arrival_airport_name text,
+    airplane_model text,
+
+    source_max_batch_id bigint not null,
+    mart_load_date timestamptz not null default now(), --время когда строка была загружена или пересчитана.
+
+    constraint pk_dm_flight_sales_mart primary key (ticket_no, flight_id)
+);
 
 
 
 
-
-
-
-
-
-
-
+create table if not excists dm.flight_revenue_mart (
+		
+		flight_id int4 not null,
+		passenger_count int4,
+		total_revenue numeric(10, 2),
+		economy_passenger_count int4,
+		economy_revenue numeric(10, 2),
+		comfort_passenger_count int4,
+		comfort_revenue numeric(10, 2),
+		business_passenger_count int4,
+		business_revenue numeric(10, 2),
+		avg_price numeric(10, 2),
+		max_price numeric(10, 2),
+		min_price numeric(10, 2),
+		status text,
+		duration interval,
+		departure_airport_name text,
+		arrival_airport_name text,
+	    airplane_model text,
 )
 
 
-select
-    s.ticket_no,
-    s.flight_id,
-    t.book_ref,
-    t.passenger_id,
-    p.passenger_name,
-    f.route_no,
-    r.departure_airport,
-    dep.airport_name_en as departure_airport_name,
-    r.arrival_airport,
-    arr.airport_name_en as arrival_airport_name,
-    r.airplane_code,
-    a.model_en as airplane_model,
-    s.fare_conditions,
-    s.price,
-    b.book_date,
-    f.scheduled_departure,
-    f.scheduled_arrival,
-    f.actual_departure,
-    f.actual_arrival,
-    f.status,
-    t.outbound,
-    greatest(
-        s.batch_id,
-        t.batch_id,
-        b.batch_id,
-        f.batch_id,
-        r.batch_id,
-        dep.batch_id,
-        arr.batch_id,
-        a.batch_id,
-        p.batch_id
-    ) as source_max_batch_id
-from dds.fact_segments s
-left join dds.fact_tickets t
-    on s.ticket_sk = t.ticket_sk
-left join dds.fact_bookings b
-    on t.bookings_sk = b.bookings_sk
-left join dds.fact_flights f
-    on s.flight_sk = f.flight_sk
-left join dds.dim_routes r
-    on f.route_sk = r.route_sk
-left join dds.dim_airports dep
-    on r.departure_airport_sk = dep.airport_sk
-left join dds.dim_airports arr
-    on r.arrival_airport_sk = arr.airport_sk
-left join dds.dim_airplanes a
-    on r.airplane_sk = a.airplane_sk
-left join dds.dim_passenger p
-    on t.passenger_sk = p.passenger_sk
-where s.is_deleted = false;
+
+
+
+
+select * from dm.flight_sales_mart order by source_max_batch_id desc limit 30;
+
+
+select 
+flight_id,
+count(passenger_id) as passenger_count,
+sum(price) as total_revenue,
+count(passenger_id) filter (where fare_conditions = 'Economy') as economy_passenger_count,
+coalesce(sum(price) filter (where fare_conditions = 'Economy'), 0) as economy_revenue,
+count(passenger_id) filter (where fare_conditions = 'Comfort') as comfort_passenger_count,
+coalesce(sum(price) filter (where fare_conditions = 'Comfort'),0) as comfort_revenue,
+count(passenger_id) filter (where fare_conditions = 'Business') as business_passenger_count,
+coalesce(sum(price) filter (where fare_conditions = 'Business'),0) as business_revenue,
+round(avg(price),2) as avg_price,
+max(price) as max_price,
+min(price) as min_price,
+max(status) as status, 
+max(duration) as duration,
+max(departure_airport_name) as departure_airport_name,
+max(arrival_airport_name) as arrival_airport_name,
+max(airplane_model) as airplane_model
+
+from dm.flight_sales_mart
+group by flight_id
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
