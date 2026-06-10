@@ -2,7 +2,7 @@
 -- Настройка пользователя БД для Superset: доступ только на чтение к DM-витринам --
 --------------------------------------------------------------------------------------------------------
 
-create user superset_user with password 'superset_password';
+create user superset_user with password '1654890102';
 
 grant connect on database postgres to superset_user;
 
