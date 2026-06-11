@@ -14,3 +14,15 @@ alter default privileges in schema dm
 grant select on tables to superset_user;
 
 
+
+
+create index if not exists ix_dm_flight_sales_mart_fare_ticket
+on dm.flight_sales_mart (fare_conditions, ticket_no);
+
+create index if not exists ix_dm_flight_sales_mart_book_date
+on dm.flight_sales_mart (book_date);
+
+create index if not exists ix_dm_flight_sales_mart_route_no
+on dm.flight_sales_mart (route_no);
+
+analyze dm.flight_sales_mart;
