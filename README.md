@@ -160,7 +160,7 @@ meta.load_data_mart_pipeline()  -- главный: все сущности + 3 D
 
 ### Дашборд
 
-![Sales Dashboard в Apache Superset](src/superset/screenshots/sales_dashboard.jpg)
+![Sales Dashboard в Apache Superset](src/superset/screenshots/sales_dashboard.png.jpg)
 
 Дашборд продаж: динамика выручки по дням, ключевые показатели (общая выручка,
 средняя цена билета, количество билетов), выручка и количество билетов по классам
