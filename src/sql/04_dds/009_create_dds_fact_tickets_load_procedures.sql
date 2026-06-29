@@ -17,11 +17,10 @@ begin
     from dds.fact_tickets;
 
     insert into dds.fact_tickets (
+ 		ticket_sk,
        	bookings_sk, 
 		passenger_sk,
         ticket_no,
-		book_ref,
-		passenger_id,
 		outbound,	
         source_system,
         record_source,
@@ -31,11 +30,10 @@ begin
     )
 
     select
+		md5(o.ticket_no || '|' || o.source_system)::uuid as ticket_sk,
 	 	fb.bookings_sk, 
 		dp.passenger_sk,
         o.ticket_no,
-        o.book_ref,
-        o.passenger_id,
         o.outbound,
         o.source_system,
         o.record_source,
@@ -43,24 +41,24 @@ begin
         now() as last_changed_at,
         o.is_deleted
     from ods.tickets o
-	left join dds.fact_bookings fb 
+	join dds.fact_bookings fb 
 		on o.book_ref=fb.book_ref
-	left join dds.dim_passenger dp
+	join dds.dim_passenger dp
 		on o.passenger_id=dp.passenger_id
 	where o.updated_batch_id > v_last_loaded_batch_id
+		and o.ticket_no is not null
 
     on conflict (ticket_no) do update
     set
 		bookings_sk = excluded.bookings_sk,
 		passenger_sk = excluded.passenger_sk,
-        book_ref = excluded.book_ref,
-        passenger_id = excluded.passenger_id,
         outbound = excluded.outbound,
         source_system = excluded.source_system,
         record_source = excluded.record_source,
         batch_id = excluded.batch_id,
         last_changed_at = now(),
-        is_deleted = excluded.is_deleted;
+        is_deleted = excluded.is_deleted
+	where dds.fact_tickets.batch_id < excluded.batch_id;
 
 end;
 $$;

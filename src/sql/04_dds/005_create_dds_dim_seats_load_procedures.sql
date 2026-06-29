@@ -8,8 +8,18 @@
 create or replace procedure dds.upsert_dim_seats_from_ods()
 language plpgsql
 as $$
+
+declare
+    v_last_loaded_batch_id bigint;
+
 begin
+
+    select coalesce(max(batch_id), 0)
+    into v_last_loaded_batch_id
+    from dds.dim_seats;
+	
     insert into dds.dim_seats (
+		seat_sk,
         airplane_code,
         seat_no,
         airplane_sk,
@@ -21,6 +31,7 @@ begin
         is_deleted
     )
     select
+		md5(o.airplane_code || '|' || o.seat_no)::uuid,
         o.airplane_code,
         o.seat_no,
         a.airplane_sk,
@@ -31,9 +42,10 @@ begin
         now() as last_changed_at,
         o.is_deleted
     from ods.seats o
-    left join dds.dim_airplanes a
+    join dds.dim_airplanes a
         on a.airplane_code = o.airplane_code
        and a.is_current = true
+	where o.updated_batch_id > v_last_loaded_batch_id
 
     on conflict (airplane_code, seat_no) do update
     set

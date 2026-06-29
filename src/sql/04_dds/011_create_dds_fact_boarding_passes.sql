@@ -17,10 +17,9 @@ begin
     from dds.fact_boarding_passes;
 
     insert into dds.fact_boarding_passes (
+  		boarding_pass_sk,		
         ticket_sk,
         flight_sk,
-        ticket_no,
-        flight_id,
         seat_no,
         boarding_no,
         boarding_time,
@@ -31,10 +30,9 @@ begin
         is_deleted
     )
     select
+		md5(o.ticket_no || '|' || o.flight_id::text || '|' || o.source_system)::uuid as boarding_pass_sk,
         ft.ticket_sk,
         ff.flight_sk,      
-        o.ticket_no,
-        o.flight_id,
         o.seat_no,
         o.boarding_no,
         o.boarding_time,
@@ -44,16 +42,16 @@ begin
         now() as last_changed_at,
         o.is_deleted
     from ods.boarding_passes o
-    left join dds.fact_tickets ft
+	join dds.fact_tickets ft
         on o.ticket_no = ft.ticket_no
-    left join dds.fact_flights ff
+	join dds.fact_flights ff
         on o.flight_id = ff.flight_id
     where o.updated_batch_id > v_last_loaded_batch_id
+      and o.ticket_no is not null
+      and o.flight_id is not null
 
-    on conflict (ticket_no, flight_id) do update
+    on conflict (ticket_sk, flight_sk) do update
     set
-        ticket_sk = excluded.ticket_sk,
-        flight_sk = excluded.flight_sk,
         seat_no = excluded.seat_no,
         boarding_no = excluded.boarding_no,
         boarding_time = excluded.boarding_time,
@@ -61,7 +59,8 @@ begin
         record_source = excluded.record_source,
         batch_id = excluded.batch_id,
         last_changed_at = now(),
-        is_deleted = excluded.is_deleted;
+        is_deleted = excluded.is_deleted
+	where dds.fact_boarding_passes.batch_id < excluded.batch_id;
 end;
 $$;
 

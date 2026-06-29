@@ -17,6 +17,7 @@ begin
     from dds.dim_passenger;
 
 insert into dds.dim_passenger(
+		passenger_sk,
 		passenger_id,
 		passenger_name,
 		source_system,
@@ -25,6 +26,7 @@ insert into dds.dim_passenger(
 		last_changed_at
 		)
 	select distinct on (passenger_id)
+		md5(o.passenger_id)::uuid,
 	    o.passenger_id,
 	    o.passenger_name,
 	    o.source_system,

@@ -17,10 +17,9 @@ begin
     from dds.fact_segments;
 
     insert into dds.fact_segments (
+		segment_sk,
         ticket_sk,
         flight_sk,
-        ticket_no,
-        flight_id,
         fare_conditions,
         price,
         source_system,
@@ -30,10 +29,9 @@ begin
         is_deleted
     )
     select
+		md5(o.ticket_no || '|' || o.flight_id::text || '|' || o.source_system)::uuid as segment_sk,
         ft.ticket_sk,
         ff.flight_sk,      
-        o.ticket_no,
-        o.flight_id,
         o.fare_conditions,
         o.price,
         o.source_system,
@@ -42,23 +40,24 @@ begin
         now() as last_changed_at,
         o.is_deleted
     from ods.segments o
-    left join dds.fact_tickets ft
+    join dds.fact_tickets ft
         on o.ticket_no = ft.ticket_no
-    left join dds.fact_flights ff
+    join dds.fact_flights ff
         on o.flight_id = ff.flight_id
     where o.updated_batch_id > v_last_loaded_batch_id
+      and o.ticket_no is not null
+      and o.flight_id is not null
 
-    on conflict (ticket_no, flight_id) do update
+    on conflict (ticket_sk, flight_sk) do update
     set
-        ticket_sk = excluded.ticket_sk,
-        flight_sk = excluded.flight_sk,
         fare_conditions = excluded.fare_conditions,
         price = excluded.price,
         source_system = excluded.source_system,
         record_source = excluded.record_source,
         batch_id = excluded.batch_id,
         last_changed_at = now(),
-        is_deleted = excluded.is_deleted;
+        is_deleted = excluded.is_deleted
+ 		where dds.fact_segments.batch_id < excluded.batch_id;	
 
 end;
 $$;

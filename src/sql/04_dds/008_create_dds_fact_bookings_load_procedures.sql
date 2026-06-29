@@ -19,6 +19,7 @@ begin
     from dds.fact_bookings;
 
     insert into dds.fact_bookings (
+		bookings_sk,
         book_ref,
         book_date,
         total_amount,
@@ -29,6 +30,7 @@ begin
         is_deleted
     )
     select
+		md5(o.book_ref|| '|' || o.source_system)::uuid,
         o.book_ref,
         o.book_date,
         o.total_amount,

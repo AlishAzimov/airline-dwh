@@ -18,9 +18,9 @@ begin
     from dds.fact_flights;
 
 insert into dds.fact_flights(
+ 		flight_sk,
 		route_sk,
 		flight_id,
-		route_no,
 		status,
 		scheduled_departure,
 		scheduled_arrival,
@@ -33,9 +33,9 @@ insert into dds.fact_flights(
 	    is_deleted
 		)
 	select 
+		md5(o.flight_id::text || '|' || o.source_system)::uuid as flight_sk,
 		r.route_sk as route_sk,
 		o.flight_id,
-		o.route_no ,
 		o.status,
 		o.scheduled_departure,
 		o.scheduled_arrival,
@@ -47,16 +47,14 @@ insert into dds.fact_flights(
 	    now() as last_changed_at, 
 	    o.is_deleted 
 	from ods.flights o
-		left join dds.dim_routes r 
+		join dds.dim_routes r 
 			on o.route_no=r.route_no
-			and o.scheduled_departure <@ r.validity
-			and r.is_current = true		
+			and o.scheduled_departure <@ r.validity	
 	where o.updated_batch_id > v_last_loaded_batch_id
 	
 	on conflict (flight_id) do update
     set
 		route_sk = excluded.route_sk,
-		route_no = excluded.route_no,
 		status = excluded.status,
 		scheduled_departure = excluded.scheduled_departure,
 		scheduled_arrival = excluded.scheduled_arrival,

@@ -38,6 +38,7 @@ language plpgsql
 as $$
 begin
     insert into dds.dim_airplanes (
+		airplane_sk,
         airplane_code,
         model_en,
         model_ru,
@@ -49,6 +50,7 @@ begin
         batch_id
     )
     select
+		md5(o.airplane_code || '|' || to_char(p_effective_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US'))::uuid,
         o.airplane_code,
         o.model_en,
         o.model_ru,

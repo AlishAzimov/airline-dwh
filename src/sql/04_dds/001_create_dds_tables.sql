@@ -5,7 +5,7 @@
 
 -- SCD2-измерение самолётов: хранит историю изменений по airplane_code
 CREATE table if not exists dds.dim_airplanes (
-    airplane_sk bigint generated always as identity, -- surrogate key
+    airplane_sk uuid not null, -- surrogate key, считается в процедуре
 	airplane_code text not null,
     model_en text,
     model_ru text,
@@ -23,21 +23,23 @@ CREATE table if not exists dds.dim_airplanes (
     constraint chk_dds_airplanes_valid_period check (valid_to > valid_from) -- чек правильного заполнение дат
     );
 
+
 -- SCD2: запрещает наличие нескольких активных версий одного airplane_code
 create unique index if not exists uq_dds_dim_airplanes_current
 on dds.dim_airplanes (airplane_code)
 where is_current = true;
 
 
+
 -- SCD2-измерение аэропортов: хранит историю изменений по airport_code 
 CREATE table if not exists dds.dim_airports (
-  	airport_sk bigint generated always as identity, -- surrogate key
+  	airport_sk uuid not null, -- surrogate key, считается в процедуре
     airport_code text not null,
     airport_name_en text,
     airport_name_ru text,
     city_en text,
     city_ru text,
-    country_en text,
+   	country_en text,
     country_ru text,
     coordinates point,
     timezone text,
@@ -57,23 +59,17 @@ CREATE table if not exists dds.dim_airports (
 create unique index if not exists uq_dds_dim_airport_current
 on dds.dim_airports (airport_code)
 where is_current = true;    
-    
 
--- SCD2-измерение маошрутов: хранит историю изменений по route_no и validity
+-- SCD1-измерение маошрутов
 CREATE table if not exists dds.dim_routes (
-	route_sk bigint generated always as identity, -- surrogate key	
+	route_sk uuid not null, -- surrogate key, считается в процедуре	
 	route_no text not null,
 	validity tstzrange not null,
-	
-	-- source keys из ODS
-	departure_airport text,
-	arrival_airport text,
-	airplane_code text,
-	
+
    	-- surrogate key из DDS
-    departure_airport_sk bigint,
-    arrival_airport_sk bigint,
-    airplane_sk bigint,
+    departure_airport_sk uuid not null,
+    arrival_airport_sk uuid not null,
+    airplane_sk uuid not null,
 	
 	days_of_week integer [],
 	scheduled_time time,
@@ -81,14 +77,14 @@ CREATE table if not exists dds.dim_routes (
   	-- технические поля
     source_system text not null,      -- исходная система, откуда пришла строка
     record_source text not null,      -- источник записи: таблица, файл, API и т.д.
-    valid_from timestamptz not null default now(), -- с какого момента версия актуальна
-    valid_to timestamptz not null default '9999-12-31'::timestamptz, -- до какого момента версия актуальна
-	is_current boolean not null default true, -- текущая ли версия
     batch_id bigint not null, -- batch, который создал или последний раз изменил статус версии
+    last_changed_at timestamptz not null default now(),
+ 	is_deleted boolean not null default false,
     
     constraint pk_dds_routes primary key (route_sk),
-    constraint chk_dds_routes_valid_period check (valid_to > valid_from), -- чек правильного заполнение дат
     
+    constraint uq_dds_dim_seats_source_key unique (route_no, validity),
+ 
  	constraint fk_dds_routes_departure_airport
         foreign key (departure_airport_sk)
         references dds.dim_airports (airport_sk),
@@ -101,25 +97,20 @@ CREATE table if not exists dds.dim_routes (
         foreign key (airplane_sk)
         references dds.dim_airplanes (airplane_sk)
 );
-
--- SCD2: запрещает наличие нескольких активных версий route_no + validity
-create unique index if not exists uq_dds_dim_routes_current
-on dds.dim_routes (route_no, validity)
-where is_current = true;    
-    
+   
 
 
 -- SCD1-измерение мест: хранит актуальное состояние мест по airplane_code и seat_no
 
 create table if not exists dds.dim_seats (
-    seat_sk bigint generated always as identity, -- surrogate key
+    seat_sk uuid not null, -- surrogate key, считается в процедуре
 
     -- source keys из ODS
-    airplane_code text not null,
     seat_no text not null,
+    airplane_code text,
 
     -- surrogate key из DDS
-    airplane_sk bigint,
+    airplane_sk uuid,
 
     fare_conditions text,
     
@@ -132,7 +123,7 @@ create table if not exists dds.dim_seats (
 
     constraint pk_dds_dim_seats primary key (seat_sk),
 
-    constraint uq_dds_dim_seats_source_key unique (airplane_code, seat_no),
+    constraint uq_dds_dim_routes_source_key unique (seat_no, airplane_code),
 
     constraint fk_dds_dim_seats_airplane
         foreign key (airplane_sk)
@@ -142,7 +133,7 @@ create table if not exists dds.dim_seats (
 
 -- SCD1-измерение Пассажиры, берем из таблицы tickets 
 create table if not exists dds.dim_passenger (
-    passenger_sk bigint generated always as identity, -- surrogate key
+    passenger_sk uuid not null, -- surrogate key, считается в процедуре
 
     passenger_id text not null,
 	passenger_name text,
@@ -151,7 +142,7 @@ create table if not exists dds.dim_passenger (
     source_system text not null,      -- исходная система, откуда пришла строка
     record_source text not null,      -- источник записи: таблица, файл, API и т.д.
  	batch_id bigint not null, -- batch, который создал или последний раз обновил строку
-    last_changed_at timestamptz not null default now()
+    last_changed_at timestamptz not null default now(),
 
     constraint pk_dds_dim_passenger primary key (passenger_sk),
     constraint uq_dds_dim_passenger_passenger_id unique (passenger_id)
@@ -161,10 +152,9 @@ create table if not exists dds.dim_passenger (
 
 -- Факт рейсов: хранит актуальное состояние рейсов из таблицы flights
 CREATE table if not exists dds.fact_flights (
-    flight_sk bigint generated always as identity, -- surrogate key
-    route_sk bigint,-- surrogate key из DDS
+    flight_sk uuid not null, -- surrogate key, считается в процедуре
+    route_sk uuid not null, -- surrogate key из DDS
 	flight_id int4 not null,
-	route_no text,
 	status text,
 	scheduled_departure timestamptz,
 	scheduled_arrival timestamptz,
@@ -188,7 +178,7 @@ CREATE table if not exists dds.fact_flights (
 
 
 CREATE table if not exists dds.fact_bookings (
-	bookings_sk bigint generated always as identity, -- surrogate key
+	bookings_sk uuid not null, -- surrogate key, считается в процедуре
 	book_ref text,
 	book_date timestamptz ,
 	total_amount numeric(10, 2),
@@ -204,13 +194,11 @@ CREATE table if not exists dds.fact_bookings (
 );
 
 CREATE table if not exists dds.fact_tickets (
-	ticket_sk bigint generated always as identity, -- surrogate key
-	bookings_sk bigint, -- surrogate key из DDS
-	passenger_sk bigint, -- surrogate key из DDS
+	ticket_sk uuid not null, -- surrogate key, считается в процедуре
+	bookings_sk uuid not null, -- surrogate key из DDS
+	passenger_sk uuid not null, -- surrogate key из DDS
 	
 	ticket_no text,
-	book_ref text,
-	passenger_id text,
 	outbound bool,	
     -- технические поля
     source_system text not null,      -- исходная система, откуда пришла строка
@@ -226,14 +214,11 @@ CREATE table if not exists dds.fact_tickets (
     
 );
 
-
 create table if not exists dds.fact_segments (
-    segment_sk bigint generated always as identity, -- surrogate key
-    ticket_sk bigint,-- surrogate keys из DDS
-    flight_sk bigint,-- surrogate keys из DDS
+    segment_sk uuid not null, -- surrogate key, считается в процедуре
+    ticket_sk uuid not null,-- surrogate keys из DDS
+    flight_sk uuid not null,-- surrogate keys из DDS
 
-    ticket_no text not null,
-    flight_id int4 not null,
     fare_conditions text,
     price numeric(10, 2),
     -- технические поля
@@ -245,7 +230,7 @@ create table if not exists dds.fact_segments (
 
     constraint pk_dds_fact_segments primary key (segment_sk),
 
-    constraint uq_dds_fact_segments_source_key unique (ticket_no, flight_id),
+    constraint uq_dds_fact_segments_source_key unique (ticket_sk, flight_sk),
 
     constraint fk_dds_fact_segments_ticket foreign key (ticket_sk) references dds.fact_tickets (ticket_sk),
 
@@ -256,12 +241,10 @@ create table if not exists dds.fact_segments (
 
     
 CREATE table if not exists dds.fact_boarding_passes (
-	boarding_pass_sk bigint generated always as identity, -- surrogate key	
-    ticket_sk bigint,-- surrogate keys из DDS
-    flight_sk bigint,-- surrogate keys из DDS
+	boarding_pass_sk uuid not null, -- surrogate key, считается в процедуре
+    ticket_sk uuid not null,-- surrogate keys из DDS
+    flight_sk uuid not null,-- surrogate keys из DDS
 
-	ticket_no text,
-	flight_id int4,
 	seat_no text,
 	boarding_no int4,
 	boarding_time timestamptz,
@@ -273,7 +256,7 @@ CREATE table if not exists dds.fact_boarding_passes (
     is_deleted boolean not null default false, -- актуальна строка или удалена
     
     constraint pk_dds_fact_boarding_passes primary key (boarding_pass_sk),
-    constraint uq_dds_fact_boarding_passes unique (ticket_no, flight_id),
+    constraint uq_dds_fact_boarding_passes unique (ticket_sk, flight_sk),
     constraint fk_dds_fact_boarding_passes_ticket foreign key (ticket_sk) references dds.fact_tickets (ticket_sk),
     constraint fk_dds_fact_boarding_passes_flight foreign key (flight_sk) references dds.fact_flights (flight_sk)
 
